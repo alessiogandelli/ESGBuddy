@@ -1,0 +1,44 @@
+name: Build and Deploy Flutter Web
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter web
+        run: |
+            flutter build web  --release
+
+
+      - name: Deploy to GitHub Pages repo
+        run: |
+          git config --global init.defaultBranch "main"
+          git config --global user.name "alessiogandelli"
+          git config --global user.email "alessiogandelli99@gmail.com"
+          cd build/web
+
+
+          
+          TARGET_REPO="https://alessiogandelli:${{ secrets.PAT }}@github.com/alessiogandelli/esgbuddy-web.git"
+
+          git init
+          git remote add origin $TARGET_REPO
+          git add .
+          git commit -m "Deploy Flutter web build (${GITHUB_REF##*/})"
+          git push --force --set-upstream origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
