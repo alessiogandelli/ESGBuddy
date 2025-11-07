@@ -15,25 +15,24 @@ jobs:
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
 
       - name: Install dependencies
+        working-directory: esgbuddy
         run: flutter pub get
 
       - name: Build Flutter web
-        run: |
-            cd esgbuddy
-            flutter build web  --release
-
+        working-directory: esgbuddy
+        run: flutter build web --release
 
       - name: Deploy to GitHub Pages repo
         run: |
           git config --global init.defaultBranch "main"
           git config --global user.name "alessiogandelli"
           git config --global user.email "alessiogandelli99@gmail.com"
-          cd build/web
 
-
-          
+          cd esgbuddy/build/web
           TARGET_REPO="https://alessiogandelli:${{ secrets.PAT }}@github.com/alessiogandelli/esgbuddy-web.git"
 
           git init
