@@ -5,28 +5,42 @@ on:
     branches:
       - main
 
+# 👇 give the GitHub Actions bot write access so it can push to gh-pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the full repo
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      # Set up Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
 
+      # Install dependencies (in /esgbuddy)
       - name: Install dependencies
         working-directory: esgbuddy
         run: flutter pub get
 
-      - name: Build Flutter web
+      # Build Flutter web release version
+      - name: Build Flutter Web
         working-directory: esgbuddy
         run: flutter build web --release --base-href "/"
 
+      # Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: esgbuddy/build/web
           cname: esg.studybuddy.it
+
