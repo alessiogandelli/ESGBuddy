@@ -1,6 +1,7 @@
 import 'package:esgbuddy/models/company_esg_data.dart';
 import 'package:esgbuddy/models/computed_report.dart';
 import 'package:esgbuddy/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:esgbuddy/presentation/screens/methodology_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -242,49 +243,70 @@ class _DashboardHeroState extends State<DashboardHero> {
   Widget _buildOverallScoreCircle() {
     final score = widget.company.report.overallScore;
     
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 280, maxHeight: 280),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: CustomPaint(
-          painter: _CircularScorePainter(
-            score: score,
-            color: _getScoreColor(score),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Overall Score',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
+    return Stack(
+      alignment: Alignment.topRight,
+      children: [
+        Container(
+          constraints: const BoxConstraints(maxWidth: 280, maxHeight: 280),
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: CustomPaint(
+              painter: _CircularScorePainter(
+                score: score,
+                color: _getScoreColor(score),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Overall Score',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${score.toInt()}',
+                      style: TextStyle(
+                        fontSize: 72,
+                        fontWeight: FontWeight.bold,
+                        color: _getScoreColor(score),
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      '/100',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '${score.toInt()}',
-                  style: TextStyle(
-                    fontSize: 72,
-                    fontWeight: FontWeight.bold,
-                    color: _getScoreColor(score),
-                    height: 1,
-                  ),
-                ),
-                Text(
-                  '/100',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        IconButton(
+          icon: Icon(
+            Icons.info_outline,
+            color: Colors.grey[600],
+            size: 24,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MethodologyScreen(),
+              ),
+            );
+          },
+          tooltip: 'View Scoring Methodology',
+        ),
+      ],
     );
   }
 
