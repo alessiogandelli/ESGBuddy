@@ -196,8 +196,18 @@ app.post('/api/companies', async (req: Request, res: Response) => {
       _id: result.insertedId,
       ...companyDocument
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating company:', error);
+    
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        error: 'Duplicate company entry',
+        message: 'A company with this ID already exists',
+        duplicateKey: error.keyValue
+      });
+    }
+    
     res.status(500).json({ error: 'Failed to create company and compute report' });
   }
 });
