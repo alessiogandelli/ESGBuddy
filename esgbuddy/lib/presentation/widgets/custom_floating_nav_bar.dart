@@ -42,8 +42,8 @@ class CustomFloatingNavBar extends StatelessWidget {
             onTap: () => onTap(1),
           ),
           _NavBarItem(
-            icon: Icons.person_rounded,
-            label: 'Dipendente',
+            icon: Icons.trending_up_rounded,
+            label: 'Improve',
             isSelected: currentIndex == 2,
             onTap: () => onTap(2),
           ),

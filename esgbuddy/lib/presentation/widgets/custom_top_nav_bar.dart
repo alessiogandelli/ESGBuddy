@@ -74,8 +74,8 @@ class CustomTopNavBar extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               _NavBarItem(
-                icon: Icons.person_rounded,
-                label: 'Dipendente',
+                icon: Icons.trending_up_rounded,
+                label: 'Improve',
                 isSelected: currentIndex == 2,
                 onTap: () => onTap(2),
               ),

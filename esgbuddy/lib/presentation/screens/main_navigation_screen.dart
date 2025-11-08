@@ -1,5 +1,6 @@
 import 'package:esgbuddy/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:esgbuddy/presentation/screens/stakeholder/stakeholder_screen_refactored.dart';
+import 'package:esgbuddy/presentation/screens/improve/improve_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_top_nav_bar.dart';
 import '../../data/esg_repository.dart';
@@ -125,61 +126,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                 },
                               ),
                               
-                              // Dipendente (Employee) placeholder
-                              const _PlaceholderScreen(
-                                title: 'Dipendente',
-                                icon: Icons.person_rounded,
+                              // Improve
+                              ImproveScreen(
+                                company: _selectedCompany!,
+                                companies: _companies,
+                                onCompanyChanged: (newCompany) {
+                                  setState(() {
+                                    _selectedCompany = newCompany;
+                                  });
+                                },
                               ),
                             ],
                           ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _PlaceholderScreen({
-    required this.title,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 80,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coming soon',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
