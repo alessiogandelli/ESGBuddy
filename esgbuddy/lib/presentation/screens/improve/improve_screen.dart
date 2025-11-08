@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'dart:html' as html;
 import '../../../models/company_esg_data.dart';
 import '../../../models/computed_report.dart';
 import '../../widgets/company_selector.dart';
@@ -9,12 +14,14 @@ class ImproveScreen extends StatefulWidget {
   final CompanyESGData company;
   final List<CompanyESGData> companies;
   final Function(CompanyESGData) onCompanyChanged;
+  final Function(VoidCallback)? onDownloadCallbackReady;
 
   const ImproveScreen({
     super.key,
     required this.company,
     required this.companies,
     required this.onCompanyChanged,
+    this.onDownloadCallbackReady,
   });
 
   @override
@@ -24,6 +31,24 @@ class ImproveScreen extends StatefulWidget {
 class _ImproveScreenState extends State<ImproveScreen> {
   bool _isLoadingAiReport = false;
   String? _aiReport;
+
+  @override
+  void initState() {
+    super.initState();
+    // Register the PDF generation callback with the parent after the build is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDownloadCallbackReady?.call(generatePdfReport);
+    });
+  }
+
+  @override
+  void didUpdateWidget(ImproveScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update the callback when the widget is updated
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onDownloadCallbackReady?.call(generatePdfReport);
+    });
+  }
 
   Future<void> _generateAiReport() async {
     setState(() {
@@ -96,6 +121,27 @@ class _ImproveScreenState extends State<ImproveScreen> {
     }
   }
 
+  void _copyInsightToClipboard(String title, String insightText, String recommendation) {
+    final buffer = StringBuffer();
+    buffer.writeln(title);
+    buffer.writeln();
+    buffer.writeln(insightText);
+    if (recommendation.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('Recommendation:');
+      buffer.writeln(recommendation);
+    }
+    
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Insight copied to clipboard'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   Widget _buildFormattedInsights() {
     if (_aiReport == null || _aiReport!.isEmpty) {
       return const Text('No insights available');
@@ -146,6 +192,13 @@ class _ImproveScreenState extends State<ImproveScreen> {
                           color: Colors.blue.shade900,
                         ),
                       ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.copy, color: Colors.blue.shade700, size: 18),
+                      onPressed: () => _copyInsightToClipboard(title, insightText, recommendation),
+                      tooltip: 'Copy insight',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
@@ -347,6 +400,256 @@ class _ImproveScreenState extends State<ImproveScreen> {
   String _getImprovementDescription(int sdg, double score, List<String> topics) {
     final topicsText = topics.isEmpty ? 'various topics' : topics.join(', ');
     return 'Current score: ${score.toStringAsFixed(1)}/100 - Related to: $topicsText';
+  }
+
+  Future<void> generatePdfReport() async {
+    try {
+      final pdf = pw.Document();
+      final lowestScoringSdgs = _getLowestScoringSdgs();
+
+      // Load a font that supports Unicode
+      final font = await PdfGoogleFonts.robotoRegular();
+      final fontBold = await PdfGoogleFonts.robotoBold();
+
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(40),
+          theme: pw.ThemeData.withFont(
+            base: font,
+            bold: fontBold,
+          ),
+          build: (context) => [
+            // Header
+            pw.Header(
+              level: 0,
+              child: pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'ESG Improvement Report',
+                        style: pw.TextStyle(
+                          fontSize: 24,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 8),
+                      pw.Text(
+                        widget.company.basicInfo.tradeName,
+                        style: pw.TextStyle(
+                          fontSize: 18,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  pw.Text(
+                    'Generated: ${DateTime.now().toString().substring(0, 10)}',
+                    style: const pw.TextStyle(
+                      fontSize: 10,
+                      color: PdfColors.grey600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 20),
+
+            // Company Information
+            pw.Container(
+              padding: const pw.EdgeInsets.all(16),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.grey100,
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'Company Information',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 8),
+                  pw.Text('Legal Name: ${widget.company.basicInfo.legalName}'),
+                  pw.Text('Trade Name: ${widget.company.basicInfo.tradeName}'),
+                  pw.Text('Country: ${widget.company.basicInfo.country}'),
+                  pw.Text('Industry: ${widget.company.basicInfo.industry}'),
+                ],
+              ),
+            ),
+            pw.SizedBox(height: 30),
+
+            // Areas of Improvement Section
+            pw.Text(
+              'Top 5 Areas of Improvement',
+              style: pw.TextStyle(
+                fontSize: 20,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(height: 16),
+
+            // SDG Improvement Cards
+            ...lowestScoringSdgs.map((sdg) {
+              final title = _getSdgTitle(sdg.sdg);
+              final description = _getImprovementDescription(
+                sdg.sdg,
+                sdg.sdg.toDouble(),
+                sdg.materialTopicsContributing,
+              );
+              final scorePercentage = sdg.score.toStringAsFixed(1);
+
+              return pw.Container(
+                margin: const pw.EdgeInsets.only(bottom: 16),
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey300),
+                  borderRadius: pw.BorderRadius.circular(8),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      title,
+                      style: pw.TextStyle(
+                        fontSize: 16,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Text(
+                      description,
+                      style: const pw.TextStyle(
+                        fontSize: 12,
+                        color: PdfColors.grey700,
+                      ),
+                    ),
+                    pw.SizedBox(height: 12),
+                    pw.Row(
+                      children: [
+                        pw.Text(
+                          'Performance Score: ',
+                          style: const pw.TextStyle(
+                            fontSize: 12,
+                            color: PdfColors.grey600,
+                          ),
+                        ),
+                        pw.Text(
+                          scorePercentage,
+                          style: pw.TextStyle(
+                            fontSize: 12,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Container(
+                      height: 10,
+                      width: double.infinity,
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey200,
+                        borderRadius: pw.BorderRadius.circular(4),
+                      ),
+                      child: pw.Stack(
+                        children: [
+                          pw.Container(
+                            width: (sdg.score / 100) * 500,
+                            decoration: pw.BoxDecoration(
+                              color: sdg.score >= 80
+                                  ? PdfColors.green
+                                  : sdg.score >= 60
+                                      ? PdfColors.orange
+                                      : PdfColors.red,
+                              borderRadius: pw.BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+
+            // AI Report Section (if available)
+            if (_aiReport != null && _aiReport!.isNotEmpty) ...[
+              pw.SizedBox(height: 30),
+              pw.Text(
+                'AI Improvement Analysis',
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 16),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.blue50,
+                  borderRadius: pw.BorderRadius.circular(8),
+                  border: pw.Border.all(color: PdfColors.blue100),
+                ),
+                child: pw.Text(
+                  _sanitizeTextForPdf(_aiReport!),
+                  style: const pw.TextStyle(
+                    fontSize: 12,
+                    lineSpacing: 1.5,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+
+      // Generate PDF bytes
+      final bytes = await pdf.save();
+
+      // Download PDF for web
+      final blob = html.Blob([bytes], 'application/pdf');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      html.AnchorElement(href: url)
+        ..target = 'blank'
+        ..download = 'ESG_Improvement_Report_${widget.company.basicInfo.tradeName}_${DateTime.now().toString().substring(0, 10)}.pdf'
+        ..click();
+      html.Url.revokeObjectUrl(url);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF report downloaded successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _sanitizeTextForPdf(String text) {
+    // Replace problematic Unicode characters with ASCII equivalents
+    return text
+        .replaceAll('\u2019', "'") // Right single quotation mark
+        .replaceAll('\u2018', "'") // Left single quotation mark
+        .replaceAll('\u201C', '"') // Left double quotation mark
+        .replaceAll('\u201D', '"') // Right double quotation mark
+        .replaceAll('\u2013', '-') // En dash
+        .replaceAll('\u2014', '-'); // Em dash
   }
 
   @override

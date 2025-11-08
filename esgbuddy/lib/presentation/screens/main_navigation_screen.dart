@@ -24,6 +24,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   CompanyESGData? _selectedCompany;
   bool _isLoading = true;
   String? _error;
+  VoidCallback? _downloadCallback;
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 _currentIndex = index;
               });
             },
+            onDownload: _downloadCallback,
           ),
           
           // Main content
@@ -133,6 +135,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                 onCompanyChanged: (newCompany) {
                                   setState(() {
                                     _selectedCompany = newCompany;
+                                  });
+                                },
+                                onDownloadCallbackReady: (callback) {
+                                  setState(() {
+                                    _downloadCallback = callback;
                                   });
                                 },
                               ),

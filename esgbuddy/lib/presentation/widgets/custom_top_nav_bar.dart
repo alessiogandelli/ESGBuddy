@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class CustomTopNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final VoidCallback? onDownload;
 
   const CustomTopNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.onDownload,
   });
 
   @override
@@ -89,7 +91,7 @@ class CustomTopNavBar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.download_rounded),
-                onPressed: () {},
+                onPressed: onDownload,
                 color: Colors.grey.shade600,
                 tooltip: 'Download',
               ),
