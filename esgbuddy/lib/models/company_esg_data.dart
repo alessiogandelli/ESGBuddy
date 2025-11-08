@@ -1,6 +1,43 @@
 import 'computed_report.dart';
 import 'topics_data.dart';
 
+/// Model for Financial Metrics
+class FinancialMetrics {
+  final String currency;
+  final double annualRevenue;
+  final double ebitda;
+  final double totalAssets;
+  final double rdInvestment;
+  final double capex;
+  final double sustainabilityInvestment;
+
+  FinancialMetrics({
+    required this.currency,
+    required this.annualRevenue,
+    required this.ebitda,
+    required this.totalAssets,
+    required this.rdInvestment,
+    required this.capex,
+    required this.sustainabilityInvestment,
+  });
+
+  factory FinancialMetrics.fromJson(Map<String, dynamic> json) {
+    return FinancialMetrics(
+      currency: json['currency'] ?? 'EUR',
+      annualRevenue: (json['annual_revenue'] ?? 0).toDouble(),
+      ebitda: (json['ebitda'] ?? 0).toDouble(),
+      totalAssets: (json['total_assets'] ?? 0).toDouble(),
+      rdInvestment: (json['rd_investment'] ?? 0).toDouble(),
+      capex: (json['capex'] ?? 0).toDouble(),
+      sustainabilityInvestment: (json['sustainability_investment'] ?? 0).toDouble(),
+    );
+  }
+
+  double get ebitdaMargin => annualRevenue > 0 ? (ebitda / annualRevenue) * 100 : 0;
+  double get rdIntensity => annualRevenue > 0 ? (rdInvestment / annualRevenue) * 100 : 0;
+  double get sustainabilityIntensity => annualRevenue > 0 ? (sustainabilityInvestment / annualRevenue) * 100 : 0;
+}
+
 /// Model for Company Basic Information
 class CompanyBasicInfo {
   final String legalName;
@@ -8,6 +45,7 @@ class CompanyBasicInfo {
   final String industry;
   final String sector;
   final String country;
+  final FinancialMetrics? financialMetrics;
 
   CompanyBasicInfo({
     required this.legalName,
@@ -15,12 +53,14 @@ class CompanyBasicInfo {
     required this.industry,
     required this.sector,
     required this.country,
+    this.financialMetrics,
   });
 
   factory CompanyBasicInfo.fromJson(Map<String, dynamic> json) {
     final basicInfo = json['basic_information'] ?? {};
     final industryData = basicInfo['industry'] ?? {};
     final headquarters = basicInfo['headquarters'] ?? {};
+    final financialData = json['financial_metrics'];
 
     return CompanyBasicInfo(
       legalName: basicInfo['legal_name'] ?? '',
@@ -28,6 +68,9 @@ class CompanyBasicInfo {
       industry: industryData['sector'] ?? '',
       sector: industryData['subsector'] ?? '',
       country: headquarters['country'] ?? '',
+      financialMetrics: financialData != null 
+          ? FinancialMetrics.fromJson(financialData)
+          : null,
     );
   }
 }

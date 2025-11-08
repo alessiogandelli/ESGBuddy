@@ -1,4 +1,5 @@
 /// Models for ESG Topics Data - Environmental, Social, and Governance metrics
+library;
 
 // ============================================================================
 // ENVIRONMENTAL TOPICS

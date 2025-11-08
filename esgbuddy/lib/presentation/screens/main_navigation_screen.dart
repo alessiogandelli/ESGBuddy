@@ -1,4 +1,5 @@
 import 'package:esgbuddy/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:esgbuddy/presentation/screens/stakeholder/stakeholder_screen_refactored.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_top_nav_bar.dart';
 import '../../data/esg_repository.dart';
@@ -113,10 +114,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                                 },
                               ),
                               
-                              // Stakeholder placeholder
-                              const _PlaceholderScreen(
-                                title: 'Stakeholder',
-                                icon: Icons.groups_rounded,
+                              // Stakeholder
+                              StakeholderScreen(
+                                company: _selectedCompany!,
+                                companies: _companies,
+                                onCompanyChanged: (newCompany) {
+                                  setState(() {
+                                    _selectedCompany = newCompany;
+                                  });
+                                },
                               ),
                               
                               // Dipendente (Employee) placeholder
