@@ -1,4 +1,5 @@
 import 'computed_report.dart';
+import 'topics_data.dart';
 
 /// Model for Company Basic Information
 class CompanyBasicInfo {
@@ -39,6 +40,7 @@ class CompanyESGData {
   final int fiscalYear;
   final CompanyBasicInfo basicInfo;
   final ComputedReport report;
+  final TopicsData topics;
   final DateTime createdAt;
 
   CompanyESGData({
@@ -48,6 +50,7 @@ class CompanyESGData {
     required this.fiscalYear,
     required this.basicInfo,
     required this.report,
+    required this.topics,
     required this.createdAt,
   });
 
@@ -75,6 +78,7 @@ class CompanyESGData {
           : int.tryParse(reportingPeriod['fiscal_year']?.toString() ?? '0') ?? 0,
       basicInfo: CompanyBasicInfo.fromJson(companyProfile),
       report: ComputedReport.fromJson(json['report'] ?? {}),
+      topics: TopicsData.fromJson(json['topics'] ?? {}),
       createdAt: _parseDate(json['created_at']),
     );
   }

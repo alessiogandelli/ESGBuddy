@@ -220,4 +220,25 @@ class GriTopicHelper {
     
     return 'Other';
   }
+
+  static Map<String, dynamic>? getTopicInfo(String topicCode) {
+    if (_topicData.containsKey(topicCode)) {
+      return {
+        'code': topicCode,
+        ..._topicData[topicCode]!,
+      };
+    }
+    
+    final normalizedCode = topicCode.toUpperCase();
+    for (var key in _topicData.keys) {
+      if (key.contains(normalizedCode) || normalizedCode.contains(key.replaceAll('GRI-', ''))) {
+        return {
+          'code': key,
+          ..._topicData[key]!,
+        };
+      }
+    }
+    
+    return null;
+  }
 }

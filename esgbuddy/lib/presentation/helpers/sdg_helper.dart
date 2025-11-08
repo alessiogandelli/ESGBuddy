@@ -139,6 +139,10 @@ class SdgHelper {
     ),
   };
 
+  static List<SdgInfo> get allSDGs {
+    return _sdgData.values.toList()..sort((a, b) => a.number.compareTo(b.number));
+  }
+
   static SdgInfo? getInfo(int sdgNumber) {
     return _sdgData[sdgNumber];
   }
