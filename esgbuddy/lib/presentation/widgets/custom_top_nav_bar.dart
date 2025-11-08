@@ -48,11 +48,6 @@ class CustomTopNavBar extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              Icon(
-                Icons.energy_savings_leaf,
-                color: const Color(0xFF4CAF50),
-                size: 20,
-              ),
             ],
           ),
           
@@ -95,12 +90,7 @@ class CustomTopNavBar extends StatelessWidget {
                 color: Colors.grey.shade600,
                 tooltip: 'Download',
               ),
-              IconButton(
-                icon: const Icon(Icons.settings_rounded),
-                onPressed: () {},
-                color: Colors.grey.shade600,
-                tooltip: 'Settings',
-              ),
+
             ],
           ),
         ],
