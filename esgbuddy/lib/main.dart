@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
 import 'config/app_theme.dart';
+import 'config/app_config.dart';
 import 'data/i_esg_repository.dart';
-import 'data/mock_esg_repository.dart';
+import 'data/api_service.dart';
+import 'data/esg_repository.dart';
 import 'presentation/screens/home_screen.dart';
-
-// Uncomment these for real backend:
-// import 'config/app_config.dart';
-// import 'data/api_service.dart';
-// import 'data/esg_repository.dart';
+import 'presentation/screens/company_list_screen.dart';
+import 'presentation/screens/methodology_screen.dart';
 
 void main() {
-  // Option 1: Mock data (for testing without backend) - CURRENTLY ACTIVE
-  final IEsgRepository repository = MockEsgRepository();
-
-  // Option 2: Real backend (uncomment and comment out mock above)
-  // final IEsgRepository repository = EsgRepository(
-  //   apiService: ApiService(baseUrl: AppConfig.baseUrl),
-  // );
+  // Real backend connection
+  final IEsgRepository repository = EsgRepository(
+    apiService: ApiService(baseUrl: AppConfig.baseUrl),
+  );
 
   runApp(MainApp(repository: repository));
 }
@@ -32,6 +28,10 @@ class MainApp extends StatelessWidget {
       title: 'ESG Buddy',
       theme: AppTheme.getTheme(),
       home: HomeScreen(repository: repository),
+      routes: {
+        '/methodology': (context) => const MethodologyScreen(),
+        '/companies': (context) => CompanyListScreen(repository: repository),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

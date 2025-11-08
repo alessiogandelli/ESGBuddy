@@ -17,7 +17,6 @@ class ApiService {
         Uri.parse('$baseUrl$endpoint'),
         headers: {
           'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true', // For n8n via ngrok
         },
       );
 
