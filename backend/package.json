@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn src/server.ts"
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "populate": "ts-node-dev src/populate.ts",
+    "seed": "ts-node-dev src/seed.ts"
   },
   "keywords": [],
   "author": "",

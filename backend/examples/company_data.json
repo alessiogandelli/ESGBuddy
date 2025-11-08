@@ -1,0 +1,255 @@
+{
+  "report_metadata": {
+    "report_id": "ESG-2024-DEMO-001",
+    "company_id": "IT-DEMOCO-2024",
+    "report_date": "2025-03-15",
+    "reporting_period": {
+      "start_date": "2024-01-01",
+      "end_date": "2024-12-31",
+      "fiscal_year": 2024,
+      "currency": "EUR"
+    },
+    "statement_of_use": {
+      "framework": "GRI Standards",
+      "claim": "in accordance",
+      "universal_standards": {
+        "gri_1": "GRI 1: Foundation 2021",
+        "gri_2": "GRI 2: General Disclosures 2021",
+        "gri_3": "GRI 3: Material Topics 2021"
+      },
+      "topic_standards_used": ["GRI 301","GRI 302","GRI 303","GRI 305","GRI 306","GRI 401","GRI 403","GRI 404","GRI 405","GRI 406","GRI 205","GRI 308","GRI 414","GRI 418","GRI 419"],
+      "sector_standards_used": [],
+      "external_assurance": {
+        "assured": true,
+        "assurance_provider": "EY Sustainability Services",
+        "assurance_standard": "ISAE 3000",
+        "assurance_scope": "Selected KPIs across E, S, G topics",
+        "assurance_conclusion": "Limited assurance"
+      }
+    },
+    "reporting_boundary": {
+      "entities_included": ["Demo Company S.p.A.","Demo Ops SRL"],
+      "approach": "operational control",
+      "exclusions": [],
+      "changes_since_prior_period": "None"
+    }
+  },
+
+  "company_profile": {
+    "basic_information": {
+      "legal_name": "Demo Company S.p.A.",
+      "trade_name": "DemoCo",
+      "headquarters": {
+        "address": "Via Roma 12, 20100 Milano, Italy",
+        "country": "Italy",
+        "region": "Lombardy"
+      },
+      "industry": {
+        "sector": "Technology",
+        "subsector": "Software & IT Services",
+        "gics_code": "451020",
+        "nace_code": "62.01"
+      },
+      "company_type": "Private Limited Company",
+      "year_founded": 2014,
+      "website": "https://www.democo.it"
+    },
+    "financial_metrics": {
+      "currency": "EUR",
+      "annual_revenue": 50000000,
+      "ebitda": 10000000,
+      "total_assets": 35000000,
+      "rd_investment": 5000000,
+      "capex": 3200000,
+      "sustainability_investment": 800000
+    },
+    "workforce_profile": {
+      "total_employees": 450,
+      "total_fte": 442.0,
+      "employees_by_contract": { "permanent": 420, "temporary": 30 },
+      "employees_by_type": { "full_time": 432, "part_time": 18 },
+      "contractors_non_employees": 30,
+      "geographic_distribution": { "italy": 400, "other_eu": 30, "non_eu": 20 }
+    }
+  },
+
+  "materiality": {
+    "stakeholder_engagement": [
+      { "stakeholder_group": "Employees", "engagement_method": "Survey and focus groups", "key_issues": ["Training","Pay equity","Wellbeing"] },
+      { "stakeholder_group": "Customers", "engagement_method": "Interviews", "key_issues": ["Data privacy","Service reliability","Low‑carbon solutions"] },
+      { "stakeholder_group": "Suppliers", "engagement_method": "Questionnaires", "key_issues": ["Code of conduct","Audits"] }
+    ],
+    "methodology": "Double materiality (impact and financial) using severity, likelihood, and stakeholder priority scoring",
+    "material_topics": [
+      { "topic_code": "GRI 305", "topic_name": "Emissions", "boundary": "Own ops S1/S2; selected S3 categories", "sdg_links": [{ "sdg": 7, "targets": ["7.2","7.3"] }, { "sdg": 13, "targets": ["13.2"] }], "gri_disclosures": ["305-1","305-2","305-3","305-5"] },
+      { "topic_code": "GRI 302", "topic_name": "Energy", "boundary": "Own operations", "sdg_links": [{ "sdg": 7, "targets": ["7.2","7.3"] }], "gri_disclosures": ["302-1","302-3","302-4"] },
+      { "topic_code": "GRI 303", "topic_name": "Water and Effluents", "boundary": "Own operations", "sdg_links": [{ "sdg": 6, "targets": ["6.4"] }], "gri_disclosures": ["303-3","303-4","303-5"] },
+      { "topic_code": "GRI 306", "topic_name": "Waste", "boundary": "Own operations", "sdg_links": [{ "sdg": 12, "targets": ["12.5"] }], "gri_disclosures": ["306-3","306-4","306-5"] },
+      { "topic_code": "GRI 403", "topic_name": "Occupational Health and Safety", "boundary": "Own operations, major contractors", "sdg_links": [{ "sdg": 3, "targets": ["3.9"] }, { "sdg": 8, "targets": ["8.8"] }], "gri_disclosures": ["403-1","403-2","403-9"] },
+      { "topic_code": "GRI 404", "topic_name": "Training and Education", "boundary": "Own employees", "sdg_links": [{ "sdg": 4, "targets": ["4.4"] }, { "sdg": 8, "targets": ["8.5"] }], "gri_disclosures": ["404-1","404-2","404-3"] },
+      { "topic_code": "GRI 405", "topic_name": "Diversity and Equal Opportunity", "boundary": "Own employees; board", "sdg_links": [{ "sdg": 5, "targets": ["5.5"] }, { "sdg": 10, "targets": ["10.2"] }], "gri_disclosures": ["405-1","405-2"] },
+      { "topic_code": "GRI 205", "topic_name": "Anti-corruption", "boundary": "Own ops; key suppliers and agents", "sdg_links": [{ "sdg": 16, "targets": ["16.5"] }], "gri_disclosures": ["205-1","205-2","205-3"] },
+      { "topic_code": "GRI 308/414", "topic_name": "Supplier ESG Assessment", "boundary": "Tier‑1 suppliers", "sdg_links": [{ "sdg": 8, "targets": ["8.8"] }, { "sdg": 12, "targets": ["12.6"] }], "gri_disclosures": ["308-1","414-1","414-2"] },
+      { "topic_code": "GRI 418/419", "topic_name": "Customer Privacy & Compliance", "boundary": "Own operations", "sdg_links": [{ "sdg": 16, "targets": ["16.6"] }], "gri_disclosures": ["418-1","419-1"] }
+    ]
+  },
+
+  "topics": {
+    "environmental": {
+      "energy_climate": {
+        "gri_mapping": ["302-1","302-3","302-4","305-1","305-2","305-3","305-5"],
+        "sdg_mapping": ["SDG 7","SDG 13"],
+        "metrics": {
+          "electricity_consumed_kwh": 3000000,
+          "renewable_energy_purchased_kwh": 2100000,
+          "renewable_energy_pct": 70.0,
+          "natural_gas_m3": 40000,
+          "diesel_liters": 2500,
+          "scope1_tco2e": 1100,
+          "scope2_market_tco2e": 700,
+          "scope2_location_tco2e": 1000,
+          "scope3_selected_tco2e": 7600,
+          "energy_intensity_kwh_per_eur_revenue": 0.060,
+          "emissions_intensity_tco2e_per_m_eur": 38.0,
+          "yoy_energy_intensity_change_pct": -6.0,
+          "yoy_emissions_intensity_change_pct": -5.0
+        },
+        "targets": {
+          "renewable_energy_target_pct": 100,
+          "scope1_2_net_zero_year": 2035,
+          "scope3_coverage_pct_target": 70,
+          "target_year": 2028
+        }
+      },
+      "water": {
+        "gri_mapping": ["303-3","303-4","303-5"],
+        "sdg_mapping": ["SDG 6"],
+        "metrics": {
+          "water_withdrawal_m3": 8500,
+          "water_discharge_m3": 7700,
+          "water_consumption_m3": 8000,
+          "water_recycled_m3": 1200,
+          "sites_in_water_stressed_areas": 0,
+          "water_intensity_m3_per_eur_revenue": 0.00016,
+          "yoy_water_intensity_change_pct": -8.0
+        }
+      },
+      "waste": {
+        "gri_mapping": ["306-3","306-4","306-5"],
+        "sdg_mapping": ["SDG 12"],
+        "metrics": {
+          "waste_generated_t": 42.0,
+          "waste_diverted_t": 30.0,
+          "waste_disposed_t": 12.0,
+          "hazardous_waste_t": 1.0,
+          "recycling_rate_pct": 71.4
+        }
+      },
+      "materials": {
+        "gri_mapping": ["301-1","301-2","301-3"],
+        "sdg_mapping": ["SDG 12"],
+        "metrics": {
+          "paper_t": 7.0,
+          "recycled_content_paper_pct": 85,
+          "plastic_packaging_t": 1.8,
+          "recyclable_packaging_pct": 95
+        }
+      }
+    },
+    "social": {
+      "workforce": {
+        "gri_mapping": ["401-1","405-1"],
+        "sdg_mapping": ["SDG 5","SDG 8","SDG 10"],
+        "metrics": {
+          "total_headcount": 450,
+          "new_hires": 90,
+          "departures": 50,
+          "employees_by_gender": { "female": 188, "male": 262 },
+          "women_in_management": 24,
+          "women_on_board": 2
+        }
+      },
+      "health_safety": {
+        "gri_mapping": ["403-1","403-2","403-9"],
+        "sdg_mapping": ["SDG 3","SDG 8"],
+        "metrics": {
+          "total_hours_worked": 880000,
+          "recordable_injuries": 4,
+          "lost_time_injuries": 2,
+          "fatalities": 0,
+          "trir": 0.91,
+          "ltir": 0.45
+        }
+      },
+      "training": {
+        "gri_mapping": ["404-1","404-2","404-3"],
+        "sdg_mapping": ["SDG 4","SDG 8"],
+        "metrics": {
+          "total_training_hours": 13000,
+          "avg_training_hours_per_employee": 28.9,
+          "training_investment_eur": 440000,
+          "employees_reviewed_pct": 93.0,
+          "internal_promotion_rate_pct": 9.5
+        }
+      },
+      "diversity_equity": {
+        "gri_mapping": ["405-1","405-2"],
+        "sdg_mapping": ["SDG 5","SDG 10"],
+        "metrics": {
+          "gender_pay_gap_pct": 3.5,
+          "employees_with_disabilities": 12
+        }
+      }
+    },
+    "governance": {
+      "ethics_anticorruption": {
+        "gri_mapping": ["205-1","205-2","205-3","419-1"],
+        "sdg_mapping": ["SDG 16"],
+        "metrics": {
+          "code_of_conduct_exists": true,
+          "employees_trained_code_of_conduct_pct": 100,
+          "anti_corruption_policy_exists": true,
+          "employees_trained_anti_corruption_pct": 100,
+          "whistleblower_reports": 5,
+          "confirmed_corruption_incidents": 0,
+          "legal_fines_eur": 0
+        }
+      },
+      "data_privacy_security": {
+        "gri_mapping": ["418-1"],
+        "sdg_mapping": ["SDG 16"],
+        "metrics": {
+          "iso_27001_certified": true,
+          "gdpr_compliant": true,
+          "data_breaches": 0,
+          "customer_records_compromised": 0,
+          "penetration_tests_conducted": 2
+        }
+      },
+      "board_governance": {
+        "gri_mapping": ["2-9","2-10","2-11","2-12"],
+        "sdg_mapping": ["SDG 16"],
+        "metrics": {
+          "board_size": 5,
+          "independent_directors_pct": 40.0,
+          "board_gender_diversity_women_pct": 40.0,
+          "avg_board_attendance_pct": 96.0,
+          "sustainability_committee_exists": true
+        }
+      },
+      "supply_chain": {
+        "gri_mapping": ["204-1","308-1","414-1","414-2"],
+        "sdg_mapping": ["SDG 8","SDG 12"],
+        "metrics": {
+          "total_suppliers": 150,
+          "suppliers_signed_coc_pct": 90.0,
+          "suppliers_audited_esg_pct": 55.0,
+          "local_suppliers_pct": 60.0,
+          "procurement_spend_local_pct": 45.0,
+          "supplier_esg_violations": 1,
+          "supplier_esg_violations_remediated": 1
+        }
+      }
+    }
+  }
+}
