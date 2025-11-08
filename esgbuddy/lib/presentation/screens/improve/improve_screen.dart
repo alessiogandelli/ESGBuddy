@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../../../models/company_esg_data.dart';
 import '../../../models/computed_report.dart';
 import '../../widgets/company_selector.dart';
 
-class ImproveScreen extends StatelessWidget {
+class ImproveScreen extends StatefulWidget {
   final CompanyESGData company;
   final List<CompanyESGData> companies;
   final Function(CompanyESGData) onCompanyChanged;
@@ -15,9 +17,273 @@ class ImproveScreen extends StatelessWidget {
     required this.onCompanyChanged,
   });
 
+  @override
+  State<ImproveScreen> createState() => _ImproveScreenState();
+}
+
+class _ImproveScreenState extends State<ImproveScreen> {
+  bool _isLoadingAiReport = false;
+  String? _aiReport;
+
+  Future<void> _generateAiReport() async {
+    setState(() {
+      _isLoadingAiReport = true;
+      _aiReport = null;
+    });
+
+    try {
+      // Prepare data for AI analysis - just send company ID
+      final requestData = {
+        'company_id': widget.company.id,
+      };
+
+      // Call n8n webhook
+      final response = await http.post(
+        Uri.parse('https://00229abdafd2.ngrok-free.app/webhook/ai-insights'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse JSON response
+        final jsonResponse = json.decode(response.body);
+        
+        // Extract the text content from the nested structure
+        // The structure is: response.output[0].content[0].text
+        String reportText = '';
+        
+        if (jsonResponse is Map<String, dynamic>) {
+          final output = jsonResponse['output'];
+          if (output is List && output.isNotEmpty) {
+            final firstOutput = output[0];
+            if (firstOutput is Map<String, dynamic>) {
+              final content = firstOutput['content'];
+              if (content is List && content.isNotEmpty) {
+                final firstContent = content[0];
+                if (firstContent is Map<String, dynamic>) {
+                  reportText = firstContent['text']?.toString() ?? '';
+                }
+              }
+            }
+          }
+        }
+        
+        setState(() {
+          _aiReport = reportText;
+          _isLoadingAiReport = false;
+        });
+        
+        // Show the report in a dialog
+        if (mounted) {
+          _showAiReportDialog();
+        }
+      } else {
+        throw Exception('Failed to generate report: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingAiReport = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate AI report: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildFormattedInsights() {
+    if (_aiReport == null || _aiReport!.isEmpty) {
+      return const Text('No insights available');
+    }
+
+    try {
+      // Remove markdown code block markers if present
+      String cleanedReport = _aiReport!;
+      if (cleanedReport.contains('```json')) {
+        cleanedReport = cleanedReport.replaceAll('```json', '').replaceAll('```', '').trim();
+      }
+      
+      final reportData = json.decode(cleanedReport);
+      final insights = reportData['insights'] as List?;
+      
+      if (insights == null || insights.isEmpty) {
+        return Text(_aiReport!);
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: insights.map((insight) {
+          final title = insight['title'] ?? 'Insight';
+          final insightText = insight['insight'] ?? '';
+          final recommendation = insight['recommendation'] ?? '';
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade100),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.lightbulb_outline, color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  insightText,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Colors.black87,
+                  ),
+                ),
+                if (recommendation.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.green.shade200),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Recommendation',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade900,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                recommendation,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  height: 1.4,
+                                  color: Colors.green.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    } catch (e) {
+      // Fallback to plain text if parsing fails
+      return Text(
+        _aiReport!,
+        style: const TextStyle(
+          fontSize: 15,
+          height: 1.6,
+          color: Colors.black87,
+        ),
+      );
+    }
+  }
+
+  void _showAiReportDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.auto_awesome,
+                      color: Colors.purple.shade700,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'AI Improvement Analysis',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: _buildFormattedInsights(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   List<SdgScore> _getLowestScoringSdgs() {
     // Get all SDG scores and sort by score (lowest first)
-    final sortedSdgs = List<SdgScore>.from(company.report.sdgScores)
+    final sortedSdgs = List<SdgScore>.from(widget.company.report.sdgScores)
       ..sort((a, b) => a.score.compareTo(b.score));
     
     // Return top 5 lowest scoring SDGs (or all if less than 5)
@@ -101,9 +367,9 @@ class ImproveScreen extends StatelessWidget {
               children: [
                 // Company Selector
                 CompanySelector(
-                  selectedCompany: company,
-                  companies: companies,
-                  onCompanyChanged: onCompanyChanged,
+                  selectedCompany: widget.company,
+                  companies: widget.companies,
+                  onCompanyChanged: widget.onCompanyChanged,
                 ),
                 const SizedBox(height: 24),
                 
@@ -118,7 +384,7 @@ class ImproveScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Top 5 SDGs where ${company.basicInfo.tradeName} can enhance performance',
+                  'Top 5 SDGs where ${widget.company.basicInfo.tradeName} can enhance performance',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey.shade600,
@@ -155,6 +421,27 @@ class ImproveScreen extends StatelessWidget {
                   )),
               ],
             ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _isLoadingAiReport ? null : _generateAiReport,
+        backgroundColor: Colors.purple.shade600,
+        icon: _isLoadingAiReport
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Icon(Icons.auto_awesome, color: Colors.white),
+        label: Text(
+          _isLoadingAiReport ? 'Generating...' : 'AI Analysis',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
