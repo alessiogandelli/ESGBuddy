@@ -180,7 +180,20 @@ class _DashboardHeroState extends State<DashboardHero> {
   }
 
   String _normalizeGriCode(String code) {
-    return code.toUpperCase().replaceAll(' ', '').replaceAll('-', '').trim();
+    // Remove spaces, hyphens, and extract the main GRI number
+    String normalized = code.toUpperCase().replaceAll(' ', '').replaceAll('-', '').trim();
+    
+    // If it doesn't start with GRI, add it
+    if (!normalized.startsWith('GRI')) {
+      normalized = 'GRI$normalized';
+    }
+    
+    // Extract just the first 3 digits after GRI (e.g., GRI4011 -> GRI401, GRI302 -> GRI302)
+    if (normalized.length > 6) {
+      normalized = normalized.substring(0, 6); // "GRI" + 3 digits
+    }
+    
+    return normalized;
   }
 
   @override
