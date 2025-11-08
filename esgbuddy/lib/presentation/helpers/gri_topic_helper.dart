@@ -174,16 +174,34 @@ class GriTopicHelper {
     },
   };
 
+  /// Normalize GRI codes to handle both "GRI 302" and "GRI-302" formats
+  static String _normalizeCode(String code) {
+    return code.toUpperCase()
+        .replaceAll(' ', '-')
+        .replaceAll('GRI-', 'GRI-')
+        .trim();
+  }
+
   static String getName(String topicCode) {
+    final normalized = _normalizeCode(topicCode);
+    
     // Try exact match first
-    if (_topicData.containsKey(topicCode)) {
-      return _topicData[topicCode]!['name']!;
+    if (_topicData.containsKey(normalized)) {
+      return _topicData[normalized]!['name']!;
+    }
+    
+    // Try matching after normalization
+    for (var key in _topicData.keys) {
+      if (_normalizeCode(key) == normalized) {
+        return _topicData[key]!['name']!;
+      }
     }
     
     // Try partial match (e.g., "201" matches "GRI-201")
-    final normalizedCode = topicCode.toUpperCase();
     for (var key in _topicData.keys) {
-      if (key.contains(normalizedCode) || normalizedCode.contains(key.replaceAll('GRI-', ''))) {
+      final normalizedKey = _normalizeCode(key);
+      if (normalizedKey.contains(normalized) || 
+          normalized.contains(normalizedKey.replaceAll('GRI-', ''))) {
         return _topicData[key]!['name']!;
       }
     }
@@ -192,13 +210,23 @@ class GriTopicHelper {
   }
 
   static String getDescription(String topicCode) {
-    if (_topicData.containsKey(topicCode)) {
-      return _topicData[topicCode]!['description']!;
+    final normalized = _normalizeCode(topicCode);
+    
+    if (_topicData.containsKey(normalized)) {
+      return _topicData[normalized]!['description']!;
     }
     
-    final normalizedCode = topicCode.toUpperCase();
     for (var key in _topicData.keys) {
-      if (key.contains(normalizedCode) || normalizedCode.contains(key.replaceAll('GRI-', ''))) {
+      if (_normalizeCode(key) == normalized) {
+        return _topicData[key]!['description']!;
+      }
+    }
+    
+    // Try partial match
+    for (var key in _topicData.keys) {
+      final normalizedKey = _normalizeCode(key);
+      if (normalizedKey.contains(normalized) || 
+          normalized.contains(normalizedKey.replaceAll('GRI-', ''))) {
         return _topicData[key]!['description']!;
       }
     }
@@ -207,13 +235,23 @@ class GriTopicHelper {
   }
 
   static String getCategory(String topicCode) {
-    if (_topicData.containsKey(topicCode)) {
-      return _topicData[topicCode]!['category']!;
+    final normalized = _normalizeCode(topicCode);
+    
+    if (_topicData.containsKey(normalized)) {
+      return _topicData[normalized]!['category']!;
     }
     
-    final normalizedCode = topicCode.toUpperCase();
     for (var key in _topicData.keys) {
-      if (key.contains(normalizedCode) || normalizedCode.contains(key.replaceAll('GRI-', ''))) {
+      if (_normalizeCode(key) == normalized) {
+        return _topicData[key]!['category']!;
+      }
+    }
+    
+    // Try partial match
+    for (var key in _topicData.keys) {
+      final normalizedKey = _normalizeCode(key);
+      if (normalizedKey.contains(normalized) || 
+          normalized.contains(normalizedKey.replaceAll('GRI-', ''))) {
         return _topicData[key]!['category']!;
       }
     }
@@ -222,16 +260,29 @@ class GriTopicHelper {
   }
 
   static Map<String, dynamic>? getTopicInfo(String topicCode) {
-    if (_topicData.containsKey(topicCode)) {
+    final normalized = _normalizeCode(topicCode);
+    
+    if (_topicData.containsKey(normalized)) {
       return {
-        'code': topicCode,
-        ..._topicData[topicCode]!,
+        'code': normalized,
+        ..._topicData[normalized]!,
       };
     }
     
-    final normalizedCode = topicCode.toUpperCase();
     for (var key in _topicData.keys) {
-      if (key.contains(normalizedCode) || normalizedCode.contains(key.replaceAll('GRI-', ''))) {
+      if (_normalizeCode(key) == normalized) {
+        return {
+          'code': key,
+          ..._topicData[key]!,
+        };
+      }
+    }
+    
+    // Try partial match
+    for (var key in _topicData.keys) {
+      final normalizedKey = _normalizeCode(key);
+      if (normalizedKey.contains(normalized) || 
+          normalized.contains(normalizedKey.replaceAll('GRI-', ''))) {
         return {
           'code': key,
           ..._topicData[key]!,

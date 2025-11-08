@@ -65,53 +65,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             },
           ),
           
-          // Company Dropdown Selector
-          if (_companies.isNotEmpty && _selectedCompany != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade200),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.business, size: 20, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        value: _selectedCompany!.companyId,
-                        items: _companies.map((company) {
-                          return DropdownMenuItem<String>(
-                            value: company.companyId,
-                            child: Text(
-                              company.basicInfo.tradeName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (String? newCompanyId) {
-                          if (newCompanyId != null) {
-                            setState(() {
-                              _selectedCompany = _companies.firstWhere(
-                                (c) => c.companyId == newCompanyId,
-                              );
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          
           // Main content
           Expanded(
             child: _isLoading
@@ -150,7 +103,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                             index: _currentIndex,
                             children: [
                               // Dashboard
-                              DashboardScreen(company: _selectedCompany!),
+                              DashboardScreen(
+                                company: _selectedCompany!,
+                                companies: _companies,
+                                onCompanyChanged: (newCompany) {
+                                  setState(() {
+                                    _selectedCompany = newCompany;
+                                  });
+                                },
+                              ),
                               
                               // Stakeholder placeholder
                               const _PlaceholderScreen(

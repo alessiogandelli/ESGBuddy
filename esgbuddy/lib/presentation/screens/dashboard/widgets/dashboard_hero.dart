@@ -1,5 +1,6 @@
 import 'package:esgbuddy/models/company_esg_data.dart';
 import 'package:esgbuddy/models/computed_report.dart';
+import 'package:esgbuddy/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -19,10 +20,16 @@ class CategoryData {
 
 class DashboardHero extends StatefulWidget {
   final CompanyESGData company;
+  final FilterFramework selectedFramework;
+  final String? selectedCategory;
+  final Function(String) onCategoryTap;
 
   const DashboardHero({
     super.key,
     required this.company,
+    this.selectedFramework = FilterFramework.gri,
+    this.selectedCategory,
+    required this.onCategoryTap,
   });
 
   @override
@@ -30,7 +37,6 @@ class DashboardHero extends StatefulWidget {
 }
 
 class _DashboardHeroState extends State<DashboardHero> {
-  String? _expandedCategory;
 
   // Helper to extract all GRI codes from a category
   List<String> _getGriCodesForCategory(String category) {
@@ -92,6 +98,15 @@ class _DashboardHeroState extends State<DashboardHero> {
 
   // Helper to calculate category scores from topic scores using GRI mappings
   Map<String, CategoryData> _calculateCategoryData() {
+    switch (widget.selectedFramework) {
+      case FilterFramework.gri:
+        return _calculateCategoryDataByGri();
+      case FilterFramework.sdg:
+        return _calculateCategoryDataBySdg();
+    }
+  }
+
+  Map<String, CategoryData> _calculateCategoryDataByGri() {
     final categories = ['Environmental', 'Social', 'Governance'];
     final result = <String, CategoryData>{};
     
@@ -101,7 +116,8 @@ class _DashboardHeroState extends State<DashboardHero> {
       
       // Find matching scores in report
       final matchingScores = widget.company.report.topicScores
-          .where((score) => griCodes.contains(score.topicCode))
+          .where((score) => griCodes.any((gri) => 
+              _normalizeGriCode(gri) == _normalizeGriCode(score.topicCode)))
           .toList();
       
       // Calculate average score
@@ -119,6 +135,52 @@ class _DashboardHeroState extends State<DashboardHero> {
     }
     
     return result;
+  }
+
+  Map<String, CategoryData> _calculateCategoryDataBySdg() {
+    final categories = ['Environmental', 'Social', 'Governance'];
+    final result = <String, CategoryData>{};
+    
+    for (final category in categories) {
+      final griCodes = _getGriCodesForCategory(category);
+      final sdgs = _getSdgsForCategory(category);
+      
+      // Extract SDG numbers from strings like "SDG 7", "SDG 13"
+      final sdgNumbers = sdgs
+          .map((s) => int.tryParse(s.replaceAll(RegExp(r'[^\d]'), '')))
+          .whereType<int>()
+          .toSet();
+      
+      // Find matching SDG scores
+      final matchingSdgScores = widget.company.report.sdgScores
+          .where((score) => sdgNumbers.contains(score.sdg))
+          .toList();
+      
+      // Calculate average SDG score
+      double avgScore = 0;
+      if (matchingSdgScores.isNotEmpty) {
+        avgScore = matchingSdgScores.fold(0.0, (sum, s) => sum + s.score) / matchingSdgScores.length;
+      }
+      
+      // Get topic scores for display
+      final matchingTopicScores = widget.company.report.topicScores
+          .where((score) => griCodes.any((gri) => 
+              _normalizeGriCode(gri) == _normalizeGriCode(score.topicCode)))
+          .toList();
+      
+      result[category] = CategoryData(
+        score: avgScore,
+        griCodes: griCodes,
+        sdgs: sdgs.toList()..sort(),
+        topicScores: matchingTopicScores,
+      );
+    }
+    
+    return result;
+  }
+
+  String _normalizeGriCode(String code) {
+    return code.toUpperCase().replaceAll(' ', '').replaceAll('-', '').trim();
   }
 
   @override
@@ -241,13 +303,16 @@ class _DashboardHeroState extends State<DashboardHero> {
   }
 
   Widget _buildCategoryCard(String title, CategoryData data, Color color, IconData icon) {
-    final isExpanded = _expandedCategory == title;
+    final isSelected = widget.selectedCategory == title;
     
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(
+          color: isSelected ? color : Colors.grey[200]!,
+          width: isSelected ? 2 : 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -260,9 +325,7 @@ class _DashboardHeroState extends State<DashboardHero> {
         children: [
           InkWell(
             onTap: () {
-              setState(() {
-                _expandedCategory = isExpanded ? null : title;
-              });
+              widget.onCategoryTap(title);
             },
             borderRadius: BorderRadius.circular(12),
             child: Padding(
@@ -298,214 +361,27 @@ class _DashboardHeroState extends State<DashboardHero> {
                           color: color,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                        color: Colors.grey[400],
-                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.filter_alt,
+                          color: color,
+                          size: 20,
+                        ),
+                      ],
                     ],
                   ),
                 ],
               ),
             ),
           ),
-          if (isExpanded) ...[
-            Divider(height: 1, color: Colors.grey[200]),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (data.griCodes.isNotEmpty || data.sdgs.isNotEmpty) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (data.griCodes.isNotEmpty) ...[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'GRI Topics: ',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    data.griCodes.join(', '),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                          if (data.griCodes.isNotEmpty && data.sdgs.isNotEmpty)
-                            const SizedBox(height: 8),
-                          if (data.sdgs.isNotEmpty) ...[
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'SDGs: ',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    data.sdgs.join(', '),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  // Topic Scores
-                  if (data.topicScores.isNotEmpty) ...[
-                    Text(
-                      'Topic Scores',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...data.topicScores.map((topicScore) => _buildTopicScoreItem(
-                      topicScore,
-                      color,
-                    )),
-                  ],
-                ],
-              ),
-            ),
-          ],
+
         ],
       ),
     );
   }
 
-  Widget _buildTopicScoreItem(TopicScore topicScore, Color categoryColor) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: categoryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: categoryColor.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  topicScore.topicCode,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: categoryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${topicScore.score.toInt()}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: categoryColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Completeness: ',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-              Text(
-                '${(topicScore.completeness * 100).toInt()}%',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          LinearProgressIndicator(
-            value: topicScore.completeness,
-            backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(categoryColor),
-            minHeight: 4,
-          ),
-          if (topicScore.notes != null && topicScore.notes!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            ...topicScore.notes!.map((note) => Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '• ',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      note,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )),
-          ],
-        ],
-      ),
-    );
-  }
+
 
   Color _getScoreColor(double score) {
     if (score >= 70) return const Color(0xFF4CAF50);

@@ -26,6 +26,8 @@ class CustomTopNavBar extends StatelessWidget {
         ],
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
         children: [
           // Logo
           Row(
@@ -52,7 +54,7 @@ class CustomTopNavBar extends StatelessWidget {
             ],
           ),
           
-          const Spacer(),
+          
           
           // Navigation Items
           Row(
