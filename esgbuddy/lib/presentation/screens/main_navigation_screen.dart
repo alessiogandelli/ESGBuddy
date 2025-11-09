@@ -1,6 +1,7 @@
 import 'package:esgbuddy/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:esgbuddy/presentation/screens/stakeholder/stakeholder_screen_refactored.dart';
 import 'package:esgbuddy/presentation/screens/improve/improve_screen.dart';
+import 'package:esgbuddy/presentation/screens/about/about_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_top_nav_bar.dart';
 import '../../data/esg_repository.dart';
@@ -58,6 +59,43 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       body: Column(
         children: [
+          // Mock Data Banner (shows when using fallback data)
+          if (!_isLoading && widget.repository.isUsingMockData)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.orange.shade800, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Backend unavailable - Using demo data',
+                      style: TextStyle(
+                        color: Colors.orange.shade900,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      widget.repository.resetBackendStatus();
+                      _loadCompanies();
+                    },
+                    child: Text(
+                      'Retry',
+                      style: TextStyle(
+                        color: Colors.orange.shade900,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
           // Top Navigation Bar
           CustomTopNavBar(
             currentIndex: _currentIndex,
@@ -67,6 +105,12 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               });
             },
             onDownload: _downloadCallback,
+            onAbout: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
           ),
           
           // Main content

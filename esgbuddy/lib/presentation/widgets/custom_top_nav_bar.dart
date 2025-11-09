@@ -4,12 +4,14 @@ class CustomTopNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final VoidCallback? onDownload;
+  final VoidCallback? onAbout;
 
   const CustomTopNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
     this.onDownload,
+    this.onAbout,
   });
 
   @override
@@ -90,7 +92,20 @@ class CustomTopNavBar extends StatelessWidget {
                 color: Colors.grey.shade600,
                 tooltip: 'Download',
               ),
-
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: onAbout,
+                icon: const Icon(Icons.info_outline, size: 18),
+                label: const Text('About'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
             ],
           ),
         ],

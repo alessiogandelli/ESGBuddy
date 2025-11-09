@@ -64,7 +64,7 @@ class _ImproveScreenState extends State<ImproveScreen> {
 
       // Call n8n webhook
       final response = await http.post(
-        Uri.parse('https://00229abdafd2.ngrok-free.app/webhook/ai-insights'),
+        Uri.parse('https://4377ace2c41d.ngrok-free.app/webhook/ai-insights'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(requestData),
       );
