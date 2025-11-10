@@ -117,14 +117,18 @@ class AboutScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.emoji_events, color: Colors.white, size: 24),
-          const SizedBox(width: 12),
-          const Text(
-            'Built in 24 hours @ NOI Hackathon 2025',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Icon(Icons.emoji_events, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => _openUrl('https://hackathon.bz.it/project/-by-studybuddy'),
+            child: const Text(
+              'Built in 24 hours @ NOI Hackathon 2025',
+              style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          decoration: TextDecoration.underline,
+              ),
             ),
           ),
         ],
